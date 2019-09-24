@@ -17,6 +17,8 @@ Install [serve globally](https://www.npmjs.com/package/serve)
 cd out
 
 serve -p 8080
+
+open http://localhost:8080/ in your browser
 ```
 
 
