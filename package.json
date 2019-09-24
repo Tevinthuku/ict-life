@@ -8,6 +8,7 @@
     "@material-ui/styles": "latest",
     "clsx": "latest",
     "next": "latest",
+    "next-offline": "^4.0.5",
     "prop-types": "latest",
     "react": "latest",
     "react-dom": "latest",

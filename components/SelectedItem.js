@@ -1,59 +1,134 @@
-import React from 'react';
-import { makeStyles, useTheme } from '@material-ui/core/styles';
-import Card from '@material-ui/core/Card';
-import CardContent from '@material-ui/core/CardContent';
-import CardMedia from '@material-ui/core/CardMedia';
-import Typography from '@material-ui/core/Typography';
+import React from "react";
+import { makeStyles } from "@material-ui/core/styles";
+import clsx from "clsx";
+import Card from "@material-ui/core/Card";
+import CardHeader from "@material-ui/core/CardHeader";
+import CardMedia from "@material-ui/core/CardMedia";
+import CardContent from "@material-ui/core/CardContent";
+import CardActions from "@material-ui/core/CardActions";
+import Collapse from "@material-ui/core/Collapse";
+import Avatar from "@material-ui/core/Avatar";
+import IconButton from "@material-ui/core/IconButton";
+import Typography from "@material-ui/core/Typography";
+import Tooltip from "@material-ui/core/Tooltip";
+import { red } from "@material-ui/core/colors";
+import FavoriteIcon from "@material-ui/icons/Favorite";
+import ShareIcon from "@material-ui/icons/Share";
+import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
+import MoreVertIcon from "@material-ui/icons/MoreVert";
+import { Spring } from "react-spring/renderProps.cjs";
 
+import AnimatedText from "./AnimatedText";
 
 const useStyles = makeStyles(theme => ({
-    card: {
-        display: 'flex',
-    },
-    details: {
-        display: 'flex',
-        flexDirection: 'column',
-    },
-    content: {
-        flex: '1 0 auto',
-    },
-    cover: {
-        width: 151,
-    },
-    controls: {
-        display: 'flex',
-        alignItems: 'center',
-        paddingLeft: theme.spacing(1),
-        paddingBottom: theme.spacing(1),
-    },
-    playIcon: {
-        height: 38,
-        width: 38,
-    },
+  card: {
+    maxWidth: 345
+  },
+  media: {
+    height: 0,
+    paddingTop: "56.25%", // 16:9
+    backgroundSize: "contain"
+  },
+  expand: {
+    transform: "rotate(0deg)",
+    marginLeft: "auto",
+    transition: theme.transitions.create("transform", {
+      duration: theme.transitions.duration.shortest
+    })
+  },
+  expandOpen: {
+    transform: "rotate(180deg)"
+  },
+  avatar: {}
 }));
 
-export default function MediaControlCard({name, image, description}) {
-    const classes = useStyles();
-    const theme = useTheme();
+function mapCurrency(currency) {
+  switch (currency) {
+    case "Kenyan Shillings":
+      return "KES";
+    case "American Dollars":
+      return "USD";
+    case "Euros":
+      return "EUR";
+    case "Nigerian Naira":
+      return "NGN";
+    default:
+      "KES";
+  }
+}
 
-    return (
-        <Card className={classes.card}>
-            <div className={classes.details}>
-                <CardContent className={classes.content}>
-                    <Typography component="h5" variant="h5">
-                        {name}
-                    </Typography>
-                    <Typography variant="subtitle1" color="textSecondary">
-                        {description}
-                    </Typography>
-                </CardContent>
+export default function RecipeReviewCard({
+  name,
+  image,
+  description,
+  prices,
+  currentCurrency
+}) {
+  const classes = useStyles();
+  const [expanded, setExpanded] = React.useState(false);
 
-            </div>
-            <CardMedia
-                className={classes.cover}
-                image={image}
-                title={name}
-            />
-        </Card>
-    );
+  const handleExpandClick = () => {
+    setExpanded(!expanded);
+  };
+
+  const { currency, price } = prices.find(
+    ({ currency }) => currency === mapCurrency(currentCurrency)
+  );
+
+  return (
+    <Card className={classes.card}>
+      <CardHeader
+        avatar={
+          <Avatar aria-label="recipe" className={classes.avatar}>
+            {name[0]}
+          </Avatar>
+        }
+        title={name}
+        subheader={
+          <Spring
+            config={{ tension: 1, friction: 0.5, precision: 0.1 }}
+            from={{ val: 0 }}
+            to={{ val: `${currency} + " " + ${price}`.length }}
+          >
+            {props => (
+              <div>
+                <Typography variant="overline">
+                  {`${currency} ${price}`.substring(0, props.val)}
+                </Typography>
+              </div>
+            )}
+          </Spring>
+        }
+      />
+      <Tooltip
+        title={`To view more content on the ${name} click on the downward facing arrow`}
+        placement="top-start"
+      >
+        <CardMedia className={classes.media} image={image} />
+      </Tooltip>
+      <CardContent>
+        <Typography variant="body2" color="textSecondary" component="p">
+          {description.slice(0, 40) + " ..."}
+        </Typography>
+      </CardContent>
+      <CardActions disableSpacing>
+        <IconButton
+          className={clsx(classes.expand, {
+            [classes.expandOpen]: expanded
+          })}
+          onClick={handleExpandClick}
+          aria-expanded={expanded}
+          aria-label="show more"
+        >
+          <ExpandMoreIcon />
+        </IconButton>
+      </CardActions>
+      <Collapse in={expanded} timeout="auto" unmountOnExit>
+        <CardContent>
+          <Typography paragraph>Full Description:</Typography>
+          <Typography paragraph>{description}</Typography>
+        </CardContent>
+      </Collapse>
+    </Card>
+  );
 }
